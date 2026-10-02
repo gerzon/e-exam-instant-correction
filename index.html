@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BSIT 2101 Online Examination</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// Supabase connection settings used to save completed examination results.
+const SUPABASE_URL = "https://oqwehqvhhdvxjxugdukh.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xd2VocXZoaGR2eGp4dWdkdWtoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2NTk3MzEsImV4cCI6MjEwMzIzNTczMX0.SidafkMBgTFj9wqqk8nuIYMNbfUpaYVa5WBJUvnYUl4";
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+</script>
+
+<style>
+  /* Theme colors and reusable page values. */
+  :root{
+    --sti-blue:#003b7a;
+    --sti-blue-dark:#002b5c;
+    --sti-yellow:#ffc400;
+    --light:#f4f7fb;
+    --text:#1f2937;
+    --border:#d9e1ec;
+    --success:#16803c;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    background:var(--light);
+    color:var(--text);
+    line-height:1.5;
+  }
+  .topbar{height:9px;background:var(--sti-yellow)}
+  header{
+    background:linear-gradient(135deg,var(--sti-blue-dark),var(--sti-blue));
+    color:#fff;padding:28px 20px;
+    box-shadow:0 3px 12px rgba(0,0,0,.15);
+  }
+  .header-inner{max-width:1000px;margin:auto}
+  .header-row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .brand{font-weight:800;letter-spacing:.5px;color:var(--sti-yellow);font-size:18px}
+  .dashboard-link{display:inline-block;background:var(--sti-yellow);color:var(--sti-blue-dark);padding:9px 13px;border-radius:7px;font-size:13px;font-weight:700;text-decoration:none}
+  .dashboard-link:hover{filter:brightness(.95)}
+  h1{margin:7px 0 4px;font-size:28px}
+  .subtitle{margin:0;color:#e9f1ff}
+  .container{max-width:1000px;margin:24px auto;padding:0 15px}
+  .subject-tabs{
+    max-width:1000px;margin:22px auto 0;padding:0 15px;display:flex;gap:10px;flex-wrap:wrap
+  }
+  .tab-button{
+    flex:1 1 180px;border:1px solid var(--border);background:#fff;color:var(--sti-blue-dark);
+    border-radius:10px 10px 0 0;padding:12px 18px;font-weight:700;cursor:pointer;
+    box-shadow:0 -2px 8px rgba(0,0,0,.03)
+  }
+  .tab-button.active{
+    background:var(--sti-blue);color:#fff;border-color:var(--sti-blue);box-shadow:none
+  }
+  .tab-panel{display:none}
+  .tab-panel.active{display:block}
+  .card{
+    background:#fff;border:1px solid var(--border);border-radius:12px;
+    padding:22px;margin-bottom:18px;box-shadow:0 3px 12px rgba(0,0,0,.05)
+  }
+  .section-title{
+    background:var(--sti-blue);color:#fff;padding:12px 15px;border-radius:8px;
+    margin:-22px -22px 20px;font-size:18px;font-weight:700;
+    border-bottom:4px solid var(--sti-yellow)
+  }
+  .meta{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px}
+  label{font-weight:700;font-size:14px}
+  input[type=text], input[type=date], textarea{
+    width:100%;margin-top:6px;border:1px solid #bcc8d8;border-radius:7px;
+    padding:11px;font:inherit;background:#fff
+  }
+  .instructions{background:#fff8d9;border-left:5px solid var(--sti-yellow);padding:13px 15px;border-radius:6px}
+  .grading-scale{width:100%;margin-top:14px;border-collapse:collapse;background:#fff}
+  .grading-scale th,.grading-scale td{padding:9px 11px;border:1px solid #e2c75b;text-align:left}
+  .grading-scale th{background:var(--sti-blue);color:#fff}
+  .grading-scale tr:nth-child(even){background:#fffdf0}
+  /* Question and answer option styles. */
+  .question{padding:18px 0;border-bottom:1px solid #e6ebf2}
+  .question:last-child{border-bottom:0}
+  .question-modal{
+    display:none;position:fixed;inset:0;z-index:15;overflow-y:auto;
+    padding:28px 15px;background:rgba(0,43,92,.72)
+  }
+  .question-modal.open{display:block}
+  .question-dialog{
+    width:min(700px,100%);min-height:360px;margin:0 auto;background:#fff;
+    border:1px solid var(--border);border-radius:12px;padding:22px;
+    box-shadow:0 12px 35px rgba(0,0,0,.3)
+  }
+  .question-dialog-header{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    margin:-22px -22px 15px;padding:14px 18px;background:var(--sti-blue);
+    color:#fff;border-radius:12px 12px 0 0;border-bottom:4px solid var(--sti-yellow)
+  }
+  .question-progress{font-size:14px;font-weight:700}
+  .question-close{background:#e9eef5;color:#253247;padding:8px 13px;font-size:13px}
+  .question-dialog .question{display:block;border:0;padding:12px 0 20px}
+  .question-dialog .question[hidden]{display:none}
+  .question-navigation{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--border);padding-top:16px}
+  .question-navigation button{background:var(--sti-blue);color:#fff}
+  .question-navigation .previous{background:#e9eef5;color:#253247}
+  .question-launch{display:flex;align-items:center;justify-content:space-between;gap:14px}
+  .question-launch p{margin:0;color:#667085}
+  .open-questions{background:var(--sti-blue);color:#fff}
+  .qtext{font-weight:700;margin-bottom:11px}
+  .option{
+    display:block;padding:9px 11px;margin:6px 0;border:1px solid transparent;
+    border-radius:7px;cursor:pointer
+  }
+  .option:hover{background:#eef5ff;border-color:#c7d9f2}
+  .option.is-selected{background:#f1f7ff;border-color:#a9c8f2}
+  .option input{margin-right:9px}
+  .answer-feedback{display:none;margin-top:12px;padding:10px 12px;border-radius:8px;font-weight:700}
+  .answer-feedback.visible{display:block}
+  .answer-feedback.correct{background:#eefaf1;border-left:4px solid var(--success);color:var(--success)}
+  .answer-feedback.wrong{background:#fff0f0;border-left:4px solid #c62828;color:#8a1c1c}
+  .instant-answer-loader{
+    display:none;align-items:center;justify-content:center;gap:10px;
+    margin-top:12px;padding:12px 14px;border-radius:10px;
+    background:#fff7d6;border:1px solid #f0d77c;color:#5b4800;font-weight:700
+  }
+  .instant-answer-loader.visible{display:flex}
+  .instant-answer-loader .mini-spinner{
+    width:16px;height:16px;border:3px solid rgba(91,72,0,.2);border-top-color:#5b4800;border-radius:50%;animation:spin .8s linear infinite
+  }
+  .wrong-answer-gif{
+    display:none;width:min(100%,320px);margin:12px auto 0;border-radius:12px;
+    box-shadow:0 8px 20px rgba(0,0,0,.12);background:#fff;padding:8px
+  }
+  .wrong-answer-gif.visible{display:block}
+  /* Form controls and examination actions. */
+  .essay textarea{min-height:150px;resize:vertical}
+  .points{font-size:12px;color:#667085;font-weight:normal}
+  .actions{display:flex;gap:10px;flex-wrap:wrap}
+  button{
+    border:0;border-radius:8px;padding:13px 20px;font-weight:700;cursor:pointer;
+    font-size:15px
+  }
+  .submit{background:var(--sti-blue);color:#fff}
+  .reset{background:#e9eef5;color:#253247}
+  button:hover{opacity:.92}
+  /* Result dialog and answer review styles. */
+  #result{
+    display:none;position:fixed;inset:0;z-index:10;overflow-y:auto;
+    margin:0;padding:28px 15px;background:rgba(0,43,92,.55)
+  }
+  .result-dialog{
+    max-width:1000px;margin:auto;background:#fff;border:1px solid var(--border);
+    border-radius:12px;padding:22px;box-shadow:0 12px 35px rgba(0,0,0,.25)
+  }
+  .result-close{float:right;background:#e9eef5;color:#253247;padding:8px 13px}
+  .score{
+    font-size:30px;font-weight:800;color:var(--sti-blue);margin:5px 0
+  }
+  .success{color:var(--success);font-weight:700}
+  .warning{color:#8a5a00}
+  .review{margin-top:15px}
+  .wrong{background:#fff0f0;border-left:4px solid #c62828;padding:9px;margin:5px 0}
+  .correct{background:#eefaf1;border-left:4px solid var(--success);padding:9px;margin:5px 0}
+  .option.answer-correct{background:#eefaf1;border-color:var(--success)}
+  .option.answer-wrong{background:#fff0f0;border-color:#c62828}
+  /* Loading, welcome, fullscreen, and page-leave overlays. */
+  .loadingScreen{
+    position:fixed;inset:0;z-index:30;display:grid;place-items:center;
+    padding:20px;background:var(--sti-blue-dark);color:#fff
+  }
+  .loading-dialog{text-align:center}
+  .loading-spinner{
+    width:76px;height:76px;margin:0 auto 18px;border:8px solid rgba(255,255,255,.28);
+    border-top-color:var(--sti-yellow);border-radius:50%;animation:spin 1s linear infinite
+  }
+  .loading-dialog p{margin:0;font-weight:700}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  #submissionLoading{display:none;z-index:40}
+  #welcomeScreen{
+    position:fixed;inset:0;z-index:20;display:none;place-items:center;
+    padding:20px;background:rgba(0,43,92,.92);color:#fff
+  }
+  #fullscreenScreen{
+    position:fixed;inset:0;z-index:50;display:none;place-items:center;
+    padding:20px;background:rgba(0,43,92,.96);color:#fff
+  }
+  #pageLeaveScreen{
+    position:fixed;inset:0;z-index:60;display:none;place-items:center;
+    padding:20px;background:rgba(0,43,92,.98);color:#fff
+  }
+  .welcome-dialog{
+    width:min(560px,100%);text-align:center;background:#fff;color:var(--text);
+    border-top:7px solid var(--sti-yellow);border-radius:12px;padding:34px 28px;
+    box-shadow:0 12px 35px rgba(0,0,0,.28)
+  }
+  .welcome-dialog h2{margin:0 0 8px;color:var(--sti-blue);font-size:27px}
+  .welcome-dialog p{margin:8px 0 22px}
+  .welcome-dialog button{background:var(--sti-blue);color:#fff}
+  .loading-message{color:#667085;font-size:14px}
+  footer{text-align:center;padding:25px;color:#667085;font-size:13px}
+  /* Responsive layout adjustments for small screens. */
+  @media(max-width:700px){
+    .header-row{align-items:flex-start;flex-direction:column;gap:10px}
+    .meta{grid-template-columns:1fr}
+    h1{font-size:22px}
+    .card{padding:16px}
+    .section-title{margin:-16px -16px 16px}
+  }
+  /* Hide interactive controls when printing results. */
+  @media print{
+    .actions,#result{display:none!important}
+    body{background:#fff}
+    .card{box-shadow:none}
+  }
+</style>
+</head>
+<body>
+<div class="topbar"></div>
+<!-- Initial loading state while questions are prepared. -->
+<section id="loadingScreen" class="loadingScreen" role="status" aria-live="polite">
+  <div class="loading-dialog">
+    <div class="loading-spinner" aria-hidden="true"></div>
+    <p>Loading examination...</p>
+  </div>
+</section>
+<!-- Loading state shown while the examination is being submitted. -->
+<section id="submissionLoading" class="loadingScreen" role="status" aria-live="polite">
+  <div class="loading-dialog">
+    <div class="loading-spinner" aria-hidden="true"></div>
+    <p>Submitting your examination...</p>
+  </div>
+</section>
+<!-- Welcome dialog used to start the examination. -->
+<section id="welcomeScreen" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle">
+  <div class="welcome-dialog">
+    <h2 id="welcomeTitle">Welcome to the Examination</h2>
+    <p class="loading-message" id="loadingMessage">Preparing your randomized multiple-choice questions...</p>
+    <button id="startExam" type="button" disabled>Loading...</button>
+  </div>
+</section>
+<!-- Fullscreen warning shown on supported non-iPhone devices. -->
+<section id="fullscreenScreen" role="dialog" aria-modal="true" aria-labelledby="fullscreenTitle">
+  <div class="welcome-dialog">
+    <h2 id="fullscreenTitle">Fullscreen Required</h2>
+    <p class="loading-message">The examination is paused because fullscreen mode was exited. Return to fullscreen to continue.</p>
+    <button id="returnFullscreen" type="button">Return to Fullscreen</button>
+  </div>
+</section>
+<!-- Page-leave warning shown when the active examination loses focus. -->
+<section id="pageLeaveScreen" role="dialog" aria-modal="true" aria-labelledby="pageLeaveTitle">
+  <div class="welcome-dialog">
+    <h2 id="pageLeaveTitle">Examination Paused</h2>
+    <p class="loading-message">You left the examination page or minimized the window. Return to this page and fullscreen mode to continue.</p>
+    <button id="returnPage" type="button">Return to Examination</button>
+  </div>
+</section>
+<!-- Site header and administrator navigation. -->
+<header>
+  <div class="header-inner">
+    <div class="header-row"><div class="brand">STI COLLEGE</div><a class="dashboard-link" href="admin_dashboard.html">Admin Dashboard</a></div>
+    <h1>BSIT 2101 Online Examination</h1>
+    <p class="subtitle">Java OOP: Constructors, Encapsulation and Inheritance</p>
+  </div>
+</header>
+
+<!-- Subject tabs switch between the BSIT 2101 and Mathematics examinations. -->
+<div class="subject-tabs" role="tablist" aria-label="Examination subjects">
+  <button class="tab-button active" type="button" data-tab="ict" role="tab" aria-selected="true" aria-controls="ict-panel" id="tab-ict">BSIT 2101</button>
+  <button class="tab-button" type="button" data-tab="math" role="tab" aria-selected="false" aria-controls="math-panel" id="tab-math">General Mathematics</button>
+</div>
+
+<!-- Main examination content. -->
+<main class="container">
+  <div id="ict-panel" class="tab-panel active" role="tabpanel" aria-labelledby="tab-ict">
+    <form id="examForm">
+      <!-- BSIT 2101 student information fields. -->
+      <section class="card">
+        <div class="section-title">Student Information</div>
+        <div class="meta">
+          <div><label for="name">Name</label><input id="name" type="text" placeholder="Enter your full name" required></div>
+          <div><label for="section">Section</label><input id="section" type="text" placeholder="Section" value="BSIT 2101" disabled></div>
+          <div><label for="date">Date</label><input id="date" type="date" required></div>
+        </div>
+      </section>
+
+      <!-- BSIT 2101 examination instructions and grading scale. -->
+      <section class="card">
+        <div class="section-title">Instructions</div>
+        <div class="instructions">
+          <strong>Multiple Choice:</strong> Choose the best answer. 50 items × 2 points = 100 points.<br>
+          <strong>Total:</strong> 100 points.
+          <table class="grading-scale" aria-label="Personal grading scale">
+            <thead>
+              <tr><th>Score</th><th>Recording</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>90 - 100</td><td>Will be recorded as 100 points</td></tr>
+              <tr><td>75 - 89</td><td>Actual score</td></tr>
+              <tr><td>74 &amp; below</td><td>Will be recorded as zero points</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- BSIT 2101 question launcher. Individual questions render in the modal below. -->
+      <section class="card">
+        <div class="section-title">Multiple Choice <span class="points">(50 items × 2 points = 100 points)</span></div>
+        <div class="question-launch">
+          <p>Answer each question in the examination window.</p>
+          <button id="openIctQuestions" class="open-questions" type="button">Open Questions</button>
+        </div>
+      </section>
+
+      <!-- BSIT 2101 submission and reset actions. -->
+      <section class="card">
+        <div class="actions">
+          <button id="submitButton" class="submit" type="submit">Submit Examination</button>
+          <button class="reset" type="button" onclick="resetExam()">Reset Answers</button>
+        </div>
+      </section>
+
+    <!-- BSIT 2101 one-question-at-a-time modal. -->
+    <section id="ictQuestionModal" class="question-modal" role="dialog" aria-modal="true" aria-labelledby="ictQuestionModalTitle">
+      <div class="question-dialog">
+        <div class="question-dialog-header">
+          <strong id="ictQuestionModalTitle">BSIT 2101 Question</strong>
+          <span id="ictQuestionProgress" class="question-progress"></span>
+          <button class="question-close" type="button" data-close-question-modal="ictQuestionModal">Back to Exam</button>
+        </div>
+        <div id="mcqContainer"></div>
+        <div class="question-navigation">
+          <button id="ictPreviousQuestion" class="previous" type="button">Previous</button>
+          <button id="ictNextQuestion" type="button">Next</button>
+        </div>
+      </div>
+    </section>
+    </form>
+
+    <!-- BSIT 2101 score and answer review dialog. -->
+    <section id="result" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+      <div class="result-dialog">
+        <button class="result-close" type="button" onclick="closeResult()" aria-label="Close examination result">Close</button>
+        <div id="resultTitle" class="section-title">Examination Result</div>
+        <div id="resultText"></div>
+        <div id="review" class="review"></div>
+      </div>
+    </section>
+  </div>
+
+  <div id="math-panel" class="tab-panel" role="tabpanel" aria-labelledby="tab-math" hidden>
+    <form id="mathExamForm">
+      <!-- Mathematics student information fields. -->
+      <section class="card">
+        <div class="section-title">Student Information</div>
+        <div class="meta">
+          <div><label for="mathName">Name</label><input id="mathName" type="text" placeholder="Enter your full name" required></div>
+          <div><label for="mathSection">Section</label><input id="mathSection" type="text" placeholder="Section" value="STEM - General Math" disabled></div>
+          <div><label for="mathDate">Date</label><input id="mathDate" type="date" required></div>
+        </div>
+      </section>
+
+      <!-- Mathematics examination instructions and grading scale. -->
+      <section class="card">
+        <div class="section-title">Instructions</div>
+        <div class="instructions">
+          <strong>Multiple Choice:</strong> Choose the best answer. 10 items × 2 points = 20 points.<br>
+          <strong>Total:</strong> 20 points.
+          <table class="grading-scale" aria-label="Mathematics grading scale">
+            <thead>
+              <tr><th>Score</th><th>Recording</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>18 - 20</td><td>Excellent</td></tr>
+              <tr><td>14 - 17</td><td>Proficient</td></tr>
+              <tr><td>13 &amp; below</td><td>Needs review</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Mathematics question launcher. Individual questions render in the modal below. -->
+      <section class="card">
+        <div class="section-title">Multiple Choice <span class="points">(10 items × 2 points = 20 points)</span></div>
+        <div class="question-launch">
+          <p>Answer each question in the examination window.</p>
+          <button id="openMathQuestions" class="open-questions" type="button">Open Questions</button>
+        </div>
+      </section>
+
+      <!-- Mathematics submission and reset actions. -->
+      <section class="card">
+        <div class="actions">
+          <button id="mathSubmitButton" class="submit" type="submit">Submit Examination</button>
+          <button class="reset" type="button" onclick="resetMathExam()">Reset Answers</button>
+        </div>
+      </section>
+
+    <!-- Mathematics one-question-at-a-time modal. -->
+    <section id="mathQuestionModal" class="question-modal" role="dialog" aria-modal="true" aria-labelledby="mathQuestionModalTitle">
+      <div class="question-dialog">
+        <div class="question-dialog-header">
+          <strong id="mathQuestionModalTitle">Mathematics Question</strong>
+          <span id="mathQuestionProgress" class="question-progress"></span>
+          <button class="question-close" type="button" data-close-question-modal="mathQuestionModal">Back to Exam</button>
+        </div>
+        <div id="mathMcqContainer"></div>
+        <div class="question-navigation">
+          <button id="mathPreviousQuestion" class="previous" type="button">Previous</button>
+          <button id="mathNextQuestion" type="button">Next</button>
+        </div>
+      </div>
+    </section>
+    </form>
+
+    <!-- Mathematics score and answer review dialog. -->
+    <section id="mathResult" role="dialog" aria-modal="true" aria-labelledby="mathResultTitle" style="display:none;position:fixed;inset:0;z-index:10;overflow-y:auto;margin:0;padding:28px 15px;background:rgba(0,43,92,.55)">
+      <div class="result-dialog">
+        <button class="result-close" type="button" onclick="closeResult('mathResult')" aria-label="Close mathematics result">Close</button>
+        <div id="mathResultTitle" class="section-title">Examination Result</div>
+        <div id="mathResultText"></div>
+        <div id="mathReview" class="review"></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- Site footer. -->
+<footer>BSIT 2101 Online Examination - Java OOP</footer>
+
+<script>
+// BSIT 2101 question bank: Java OOP constructors, encapsulation and inheritance.
+const questions = [
+["What fundamental OOP concept allows a class to acquire attributes and behaviors from another class?",["Encapsulation","Polymorphism","Inheritance","Abstraction"],"C","Inheritance allows a class to acquire attributes and behaviors from another class."],
+["Which term refers to a class that is derived from another class?",["Superclass","Subclass","Child class","Base class"],"B","A class derived from another class is a subclass."],
+["What is another commonly used term for a superclass?",["Derived class","Base class","Extended class","Parent class"],"D","A superclass is also called a parent class."],
+["Which keyword is used in Java to implement inheritance between classes?",["inherits","implements","extends","super"],"C","The extends keyword establishes class inheritance."],
+["What type of inheritance hierarchy does Java support for classes?",["Multiple inheritance","Single inheritance","Dual inheritance","Cyclic inheritance"],"B","A Java class can directly extend only one class."],
+["Which top-level Java class is the ultimate ancestor of all other classes?",["java.lang.Class","java.lang.Object","java.lang.System","java.lang.Root"],"B","java.lang.Object is the root class of Java's class hierarchy."],
+["Which class is the only class in Java that does NOT have any parent class?",["Object","String","Main","Class"],"A","Object is the root class and has no parent class."],
+["If a class declaration does not explicitly use the extends keyword, which class does it invisibly extend?",["java.lang.String","java.lang.Object","java.util.Base","None"],"B","Every class without an explicit superclass implicitly extends Object."],
+["What modifier is placed before a class declaration to prevent it from being extended?",["static","abstract","final","private"],"C","A final class cannot be extended."],
+["How does a subclass access a private field declared in its superclass directly?",["Using the super keyword","Using the this keyword","It cannot access it directly","By casting to the parent"],"C","Private superclass fields are not directly accessible in subclasses."],
+["What condition allows a subclass to access a parent class without using an import statement?",["If both are public","If both are in the same package","If superclass is final","Import is always required"],"B","Classes in the same package can refer to one another without an import."],
+["In the statement public class Student extends Person, which class is the child class?",["Person","Student","Object","String"],"B","Student extends Person, so Student is the child class."],
+["Which of the following class declarations is illegal in Java?",["class A extends B","class A extends B, C","class A extends Object","final class A"],"B","Java does not support extending multiple classes."],
+["What structural element is primarily used during the creation of an object instance using the new keyword?",["Method","Constructor","Variable","Interface"],"B","A constructor initializes an object when it is created."],
+["What is the return type specified in a constructor declaration?",["void","Object","Same as class","No return type"],"D","Constructors do not declare a return type."],
+["What rule governs the naming of a constructor in Java?",["Must start with set","Must match the class name exactly","Must be init()","Can be any valid identifier"],"B","A constructor name must exactly match its class name."],
+["Are constructors inherited by child classes from parent classes?",["Yes, always","Yes, if public","No, never","Yes, if protected"],"C","Constructors are not inherited by child classes."],
+["What does Java automatically provide when no constructors are explicitly written in a class?",["Static constructor","Default no-argument constructor","Private constructor","Copy constructor"],"B","The compiler supplies a default no-argument constructor."],
+["What is contained in the parameter list of a compiler-generated default constructor?",["String args[]","Empty parameter list","Object self","int index"],"B","A default constructor has no parameters."],
+["What keyword resolves ambiguity when a constructor parameter has the exact same name as an instance variable?",["super","this","self","static"],"B","this distinguishes the instance variable from the parameter."],
+["What feature allows a class to have multiple constructors with different parameter signatures?",["Constructor Overriding","Constructor Overloading","Constructor Hiding","Constructor Shadowing"],"B","Multiple constructor signatures are constructor overloading."],
+["What term describes the process of one constructor calling another constructor within the same class?",["Method Overriding","Constructor Chaining","Super Invocation","Dynamic Binding"],"B","A constructor calling another constructor is constructor chaining."],
+["Which statement is used to call another constructor in the same class?",["this()","super()","new Self()","this.init()"],"A","this() invokes another constructor in the same class."],
+["What position must a this() or super() call occupy inside a constructor body?",["Any line","Last statement","First statement","Inside a try block"],"C","A constructor invocation must be the first statement."],
+["What statement is automatically inserted as the first line of a constructor if neither this() nor super() is declared?",["super();","this();","return;","System.exit(0);"],"A","Java implicitly inserts a call to super()."],
+["In an inheritance chain (Person -> Student -> FirstYear), in what sequence are constructors executed?",["FirstYear -> Student -> Person","Student -> Person -> FirstYear","Person -> Student -> FirstYear","Random order"],"C","Superclass constructors execute before subclass constructors."],
+["What happens if a parent class lacks a no-argument constructor, and the child constructor does not explicitly call super(...)?",["Code runs normally","Compilation error","Runtime exception","Null pointer warning"],"B","The compiler cannot insert a valid implicit super() call."],
+["Which keyword is used in a subclass to explicitly invoke a constructor of its parent class?",["super","parent","base","this"],"A","super invokes a superclass constructor."],
+["What occurs if super() is placed as the second line in a constructor definition?",["Executes second","Compilation error","Warning issued","Ignored by compiler"],"B","super() must be the first statement."],
+["Defining a new version of an existing superclass method in a subclass with the exact same signature is known as:",["Method Overloading","Method Overriding","Method Hiding","Method Shadowing"],"B","Replacing an inherited method with the same signature is overriding."],
+["Which requirement must be met by parameter lists during method overriding?",["Must be different","Must be identical","Child needs more params","Parent needs more params"],"B","Overriding requires the same parameter list."],
+["How must the accessibility of an overriding method in a subclass compare to the method in the parent class?",["Must be more restrictive","Must be private","At least as accessible","Accessibility does not matter"],"C","An overriding method cannot reduce accessibility."],
+["If a superclass method has protected access, what access modifier(s) can the overriding child method use?",["Only private","Protected or public","Only package-private","Only protected"],"B","The child method may retain protected or increase access to public."],
+["Which keyword allows an overriding method in a subclass to access the parent's original method implementation?",["super","base","this","parent"],"A","super calls the superclass implementation."],
+["What is the return type requirement when overriding a method in a child class?",["Must be void","Must be identical (or covariant)","Must be int","Can be any type"],"B","The return type must match or be covariant."],
+["What error occurs if a child class defines public Student() { System.out.println(\"A\"); super(); }?",["No error","Constructor call must be first","Invalid method name","Stack Overflow"],"B","A super() call must appear before any other constructor statement."],
+["If class Person has only public Person(String n), what statement MUST appear in public Student()?",["super();","super(\"someName\");","this();","Person();"],"B","The child must explicitly call the available superclass constructor."],
+["Can a subclass override a method that is marked with the final modifier in the superclass?",["Yes, always","No, final methods cannot be overridden","Yes, if public","Yes, using super"],"B","Final methods cannot be overridden."],
+["What core OOP principle describes an object's ability to hide its internal data and implementation details?",["Encapsulation","Polymorphism","Inheritance","Abstraction"],"A","Encapsulation bundles data and operations while restricting direct access."],
+["In standard Java encapsulation practices, how should instance variables (fields) be declared?",["public","protected","private","static"],"C","Private fields enforce controlled access through methods."],
+["What type of method is used to retrieve data from a private instance variable?",["Mutator method","Accessor method","Constructor","Destructor"],"B","An accessor reads a field value."],
+["What is another commonly used term for an accessor method?",["Setter","Getter","Builder","Modifier"],"B","An accessor is commonly called a getter."],
+["What type of method is used to modify or change the data stored in a private instance variable?",["Accessor method","Mutator method","Static method","Getter method"],"B","A mutator changes a field value."],
+["Standard naming conventions dictate that non-boolean getter methods start with which prefix?",["fetch","get","read","show"],"B","Non-boolean getters conventionally begin with get."],
+["Standard naming conventions dictate that getter methods for boolean properties start with which prefix?",["get","has","is","check"],"C","Boolean getters conventionally begin with is."],
+["Standard naming conventions dictate that mutator methods start with which prefix?",["set","put","update","write"],"A","Mutator methods conventionally begin with set."],
+["What term describes a class whose instance state cannot be changed once constructed?",["Static class","Immutable class","Abstract class","Transient class"],"B","An immutable object's state cannot change after construction."],
+["To achieve immutability in a class design, which methods must be removed or omitted?",["Getter methods","Setter methods","Constructors","toString methods"],"B","Setters would allow an immutable object's state to change."],
+["In an immutable class, where are initial values assigned to fields during object instantiation?",["In setter methods","In the constructor","In static initializers","In main method"],"B","Immutable fields receive their initial values in the constructor."],
+["Which of the following is a primary benefit of encapsulation?",["Allows code reuse and restricts direct access","Eliminates need for memory management","Speeds up compilation","Removes class dependency"],"A","Encapsulation restricts direct access and supports maintainable class design."]
+];// Mathematics question bank.
+const mathQuestions = [
+  ["What is the value of 12 + 8 × 3?",["36","60","28","24"],"B","Multiplication comes before addition, so 8 × 3 = 24 and 12 + 24 = 36."],
+  ["Find the remainder when 49 is divided by 6.",["1","3","4","5"],"C","49 ÷ 6 = 8 remainder 1."],
+  ["What is 25% of 240?",["40","50","60","80"],"C","25% of 240 is 0.25 × 240 = 60."],
+  ["Solve for x: 3x - 9 = 12.",["x = 3","x = 5","x = 7","x = 9"],"C","Add 9 to both sides: 3x = 21, then divide by 3."],
+  ["Which fraction is equivalent to 0.75?",["1/2","2/3","3/4","4/5"],"C","0.75 = 75/100 = 3/4."],
+  ["A triangle has angles 45°, 65°, and x°. What is x?",["60°","70°","80°","90°"],"B","The sum of triangle angles is 180°, so x = 180 - 45 - 65 = 70."],
+  ["What is the product of 7 and 9?",["56","63","72","81"],"B","7 × 9 = 63."],
+  ["Which number is the greatest common factor of 24 and 36?",["6","8","12","18"],"C","12 is the greatest common factor of 24 and 36."],
+  ["If a = 5 and b = 2, what is a² - b²?",["17","21","29","31"],"C","25 - 4 = 21."],
+  ["What is the perimeter of a square with side length 6 cm?",["12 cm","18 cm","24 cm","36 cm"],"C","Perimeter = 4 × 6 = 24 cm."]
+];
+
+// Escape question text before inserting it into the page.
+function escapeHTML(value){
+  return String(value).replace(/[&<>"']/g,character=>(
+    {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[character])
+  );
+}
+
+// Identify the broad device category without collecting a unique device fingerprint.
+function detectDevice(){
+  const userAgent=navigator.userAgent||"";
+  if(/iPhone/i.test(userAgent)) return "iPhone";
+  if(/iPad/i.test(userAgent)||(/Macintosh/i.test(userAgent)&&navigator.maxTouchPoints>1)) return "iPad";
+  if(/Android/i.test(userAgent)) return "Android";
+  if(/Windows/i.test(userAgent)) return "Windows";
+  if(/Macintosh|Mac OS X/i.test(userAgent)) return "Mac";
+  if(/Linux/i.test(userAgent)) return "Linux";
+  return "Unknown";
+}
+
+const device=detectDevice();
+
+// Save a completed examination and return a user-facing status message.
+async function saveExamSubmission(submission){
+  if(SUPABASE_KEY==="******"){
+    const message="The examination was graded, but it was not saved because the Supabase anon key is not configured.";
+    console.error(message);
+    return message;
+  }
+  try{
+    const { error }=await supabaseClient
+      .from("exam_submissions")
+      .insert(submission);
+    if(error){
+      console.error("Could not save exam result:",error);
+      return `The examination was graded, but it could not be saved (${error.message}).`;
+    }
+    return "";
+  }catch(error){
+    console.error("Could not save exam result:",error);
+    return "The examination was graded, but it could not be saved because the database request failed.";
+  }
+}
+
+// Render BSIT 2101 questions and their answer choices.
+function renderMCQ(){
+  const c=document.getElementById("mcqContainer");
+  c.innerHTML=questions.map((q,i)=>{
+    const n=i+1;
+    return `<div class="question" data-question-index="${i}"${i===0?"":" hidden"}>
+      <div class="qtext">${n}. ${escapeHTML(q[0])}</div>
+      ${q[1].map((opt,j)=>{
+        const letter=String.fromCharCode(65+j);
+        return `<label class="option"><input type="radio" name="q${n}" value="${letter}"${j===0?" required":""}> <strong>${letter}.</strong> ${escapeHTML(opt)}</label>`;
+      }).join("")}
+      <div class="instant-answer-loader" aria-live="polite"><span class="mini-spinner"></span><span>Checking your genius...</span></div>
+      <div class="answer-feedback" aria-live="polite"></div>
+      <img class="wrong-answer-gif" src="You Are Wrong No GIF.gif" alt="Wrong answer reaction" />
+    </div>`;
+  }).join("");
+  bindInstantAnswerFeedback("mcqContainer",questions);
+}
+// Render Mathematics questions and their answer choices.
+function renderMathQuestions(){
+  const c=document.getElementById("mathMcqContainer");
+  c.innerHTML=mathQuestions.map((q,i)=>{
+    const n=i+1;
+    return `<div class="question" data-question-index="${i}"${i===0?"":" hidden"}>
+      <div class="qtext">${n}. ${escapeHTML(q[0])}</div>
+      ${q[1].map((opt,j)=>{
+        const letter=String.fromCharCode(65+j);
+        return `<label class="option"><input type="radio" name="m${n}" value="${letter}"${j===0?" required":""}> <strong>${letter}.</strong> ${escapeHTML(opt)}</label>`;
+      }).join("")}
+      <div class="instant-answer-loader" aria-live="polite"><span class="mini-spinner"></span><span>Checking your genius...</span></div>
+      <div class="answer-feedback" aria-live="polite"></div>
+      <img class="wrong-answer-gif" src="You Are Wrong No GIF.gif" alt="Wrong answer reaction" />
+    </div>`;
+  }).join("");
+  bindInstantAnswerFeedback("mathMcqContainer",mathQuestions);
+}
+function bindInstantAnswerFeedback(containerId, questionSet){
+  const container=document.getElementById(containerId);
+  if(!container) return;
+  container.querySelectorAll("input[type='radio']").forEach(input=>{
+    input.addEventListener("change",()=>{
+      const question=input.closest(".question");
+      const index=Number(question.dataset.questionIndex);
+      const correctAnswer=questionSet[index][2];
+      const loader=question.querySelector(".instant-answer-loader");
+      const feedback=question.querySelector(".answer-feedback");
+      const wrongGif=question.querySelector(".wrong-answer-gif");
+      const options=question.querySelectorAll(".option");
+      const funnyMessages=[
+        "Consulting the answer oracle...",
+        "Calculating your future GPA...",
+        "Verifying the cosmic truth...",
+        "Running the judge bot...",
+        "Scanning for plot twists..."
+      ];
+      if(loader){
+        loader.querySelector("span:last-child").textContent=funnyMessages[Math.floor(Math.random()*funnyMessages.length)];
+        loader.classList.add("visible");
+      }
+      if(feedback){
+        feedback.className="answer-feedback";
+      }
+      if(wrongGif){
+        wrongGif.classList.remove("visible");
+      }
+      clearTimeout(question._instantFeedbackTimer);
+      question._instantFeedbackTimer=setTimeout(()=>{
+        let isCorrect=false;
+        options.forEach(option=>{
+          const optionInput=option.querySelector("input");
+          const selected=optionInput.checked;
+          const value=optionInput.value;
+          option.classList.toggle("is-selected",selected);
+          option.classList.toggle("answer-correct",value===correctAnswer);
+          option.classList.toggle("answer-wrong",selected&&value!==correctAnswer);
+          isCorrect = isCorrect || (selected && value===correctAnswer);
+        });
+        if(loader){ loader.classList.remove("visible"); }
+        if(input.value===correctAnswer){
+          feedback.textContent=`Correct! ${questionSet[index][3]}`;
+          feedback.className="answer-feedback correct visible";
+          if(wrongGif){ wrongGif.classList.remove("visible"); }
+        }else{
+          feedback.textContent=`Incorrect. The correct answer is ${correctAnswer}. ${questionSet[index][3]}`;
+          feedback.className="answer-feedback wrong visible";
+          if(wrongGif){ wrongGif.classList.add("visible"); }
+        }
+      },800);
+    });
+  });
+}
+function clearInstantAnswerFeedback(containerId){
+  const container=document.getElementById(containerId);
+  if(!container) return;
+  container.querySelectorAll(".question").forEach(question=>{
+    question.querySelectorAll(".option").forEach(option=>{
+      option.classList.remove("is-selected","answer-correct","answer-wrong");
+    });
+    const loader=question.querySelector(".instant-answer-loader");
+    const feedback=question.querySelector(".answer-feedback");
+    const wrongGif=question.querySelector(".wrong-answer-gif");
+    if(loader){ loader.classList.remove("visible"); }
+    if(feedback){
+      feedback.textContent="";
+      feedback.className="answer-feedback";
+    }
+    if(wrongGif){ wrongGif.classList.remove("visible"); }
+    if(question._instantFeedbackTimer){ clearTimeout(question._instantFeedbackTimer); }
+  });
+}
+// Randomize the BSIT 2101 question order for each examination session.
+function shuffleQuestions(){
+  for(let i=questions.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [questions[i],questions[j]]=[questions[j],questions[i]];
+  }
+}
+// Track the active question and controls for each subject modal.
+const questionModalState={
+  ict:{modalId:"ictQuestionModal",containerId:"mcqContainer",progressId:"ictQuestionProgress",previousId:"ictPreviousQuestion",nextId:"ictNextQuestion",openId:"openIctQuestions",total:()=>questions.length,index:0},
+  math:{modalId:"mathQuestionModal",containerId:"mathMcqContainer",progressId:"mathQuestionProgress",previousId:"mathPreviousQuestion",nextId:"mathNextQuestion",openId:"openMathQuestions",total:()=>mathQuestions.length,index:0}
+};
+// Display the current question and update navigation controls.
+function updateQuestionModal(subject){
+  const state=questionModalState[subject];
+  const container=document.getElementById(state.containerId);
+  const questionElements=container.querySelectorAll(".question");
+  questionElements.forEach((question,index)=>{question.hidden=index!==state.index;});
+  document.getElementById(state.progressId).textContent=`Question ${state.index+1} of ${state.total()}`;
+  document.getElementById(state.previousId).disabled=state.index===0;
+  document.getElementById(state.nextId).textContent=state.index===state.total()-1?"Finish Questions":"Next";
+  const currentQuestion=questionElements[state.index];
+  if(currentQuestion){
+    const firstInput=currentQuestion.querySelector("input");
+    if(firstInput) firstInput.focus();
+  }
+}
+// Open a subject's question modal.
+function openQuestionModal(subject){
+  const state=questionModalState[subject];
+  document.getElementById(state.modalId).classList.add("open");
+  document.body.style.overflow="hidden";
+  updateQuestionModal(subject);
+}
+// Close a subject's question modal and restore focus to its launcher.
+function closeQuestionModal(subject){
+  const state=questionModalState[subject];
+  document.getElementById(state.modalId).classList.remove("open");
+  document.body.style.overflow="";
+  document.getElementById(state.openId).focus();
+}
+// Move forward or backward through questions after validating forward navigation.
+function moveQuestion(subject,direction){
+  const state=questionModalState[subject];
+  const currentName=subject==="ict"?`q${state.index+1}`:`m${state.index+1}`;
+  if(direction>0&&!document.querySelector(`input[name="${currentName}"]:checked`)){
+    alert("Please select an answer before continuing.");
+    return;
+  }
+  const nextIndex=state.index+direction;
+  if(nextIndex<0||nextIndex>=state.total()){
+    closeQuestionModal(subject);
+    return;
+  }
+  state.index=nextIndex;
+  updateQuestionModal(subject);
+}
+Object.entries(questionModalState).forEach(([subject,state])=>{
+  document.getElementById(state.openId).addEventListener("click",()=>openQuestionModal(subject));
+  document.getElementById(state.previousId).addEventListener("click",()=>moveQuestion(subject,-1));
+  document.getElementById(state.nextId).addEventListener("click",()=>moveQuestion(subject,1));
+});
+document.querySelectorAll("[data-close-question-modal]").forEach(button=>{
+  button.addEventListener("click",()=>closeQuestionModal(button.dataset.closeQuestionModal==="ictQuestionModal"?"ict":"math"));
+});
+// Grade the BSIT 2101 examination and save the result to Supabase.
+async function grade(){
+  document.getElementById("submissionLoading").style.display="grid";
+  document.body.style.overflow="hidden";
+  let correct=0, answered=0, review=[];
+  questions.forEach((q,i)=>{
+    const selected=document.querySelector(`input[name="q${i+1}"]:checked`);
+    document.querySelectorAll(`input[name="q${i+1}"]`).forEach(input=>{
+      const option=input.closest(".option");
+      option.classList.toggle("answer-correct",input.value===q[2]);
+      option.classList.toggle("answer-wrong",Boolean(selected)&&input===selected&&input.value!==q[2]);
+    });
+    if(selected){
+      answered++;
+      if(selected.value===q[2]) correct++;
+      else review.push({n:i+1,selected:selected.value,correct:q[2]});
+    }
+  });
+  const points=correct*2;
+  const saveMessage=await saveExamSubmission({
+    student_name: document.getElementById("name").value.trim(),
+    section: document.getElementById("section").value.trim(),
+    exam_date: document.getElementById("date").value,
+    mcq_score: points,
+    essay_answered: 0,
+    device
+  });
+if (!saveMessage) {
+  const submitButton=document.getElementById("submitButton");
+  submitButton.type="button";
+  submitButton.textContent="Retake Examination";
+  submitButton.onclick=retakeExam;
+}
+  document.getElementById("submissionLoading").style.display="none";
+  document.getElementById("result").style.display="block";
+  document.getElementById("resultText").innerHTML=
+    `<div class="score">${points} / ${questions.length*2}</div>
+     <p><strong>Multiple-choice:</strong> ${correct} correct out of ${questions.length}. ${answered} item(s) answered.</p>
+     <p class="success">Your score is based on ${questions.length} multiple-choice items worth 2 points each.</p>
+     ${saveMessage?`<p class="warning"><strong>Save status:</strong> ${saveMessage}</p>`:"<p class=\"success\"><strong>Save status:</strong> Result saved successfully.</p>"}`;
+  document.getElementById("review").innerHTML = review.length
+    ? `<h3>Items to Review</h3>${review.map(x=>`<div class="wrong">Item ${x.n}: your answer <strong>${x.selected}</strong> • correct answer <strong>${x.correct}</strong><br>${questions[x.n-1][3]}</div>`).join("")}`
+    : `<div class="correct">Excellent! All answered items are correct.</div>`;
+  document.querySelector(".result-close").focus();
+}
+// Grade the Mathematics examination.
+async function gradeMath(){
+  let correct=0, answered=0, review=[];
+  const form=document.getElementById("mathExamForm");
+  mathQuestions.forEach((q,i)=>{
+    const selected=form.querySelector(`input[name="m${i+1}"]:checked`);
+    form.querySelectorAll(`input[name="m${i+1}"]`).forEach(input=>{
+      const option=input.closest(".option");
+      option.classList.toggle("answer-correct",input.value===q[2]);
+      option.classList.toggle("answer-wrong",Boolean(selected)&&input===selected&&input.value!==q[2]);
+    });
+    if(selected){
+      answered++;
+      if(selected.value===q[2]) correct++;
+      else review.push({n:i+1,selected:selected.value,correct:q[2]});
+    }
+  });
+  const points=correct*2;
+  const saveMessage=await saveExamSubmission({
+    student_name: document.getElementById("mathName").value.trim(),
+    section: document.getElementById("mathSection").value.trim(),
+    exam_date: document.getElementById("mathDate").value,
+    mcq_score: points,
+    essay_answered: 0,
+    device
+  });
+  const result=document.getElementById("mathResult");
+  const resultText=document.getElementById("mathResultText");
+  const reviewBox=document.getElementById("mathReview");
+  result.style.display="block";
+  resultText.innerHTML=`<div class="score">${points} / 20</div>
+    <p><strong>Multiple-choice:</strong> ${correct} correct out of 10. ${answered} item(s) answered.</p>
+    <p class="success">Your score is based on 10 multiple-choice items worth 2 points each.</p>`;
+  if(saveMessage){
+    resultText.innerHTML+=`<p class="warning"><strong>Save status:</strong> ${escapeHTML(saveMessage)}</p>`;
+  }else{
+    resultText.innerHTML+=`<p class="success"><strong>Save status:</strong> Result saved successfully.</p>`;
+  }
+  reviewBox.innerHTML = review.length
+    ? `<h3>Items to Review</h3>${review.map(x=>`<div class="wrong">Item ${x.n}: your answer <strong>${x.selected}</strong> • correct answer <strong>${x.correct}</strong><br>${mathQuestions[x.n-1][3]}</div>`).join("")}`
+    : `<div class="correct">Excellent! All answered items are correct.</div>`;
+  result.querySelector(".result-close").focus();
+}
+// Connect form submissions to their grading functions.
+document.getElementById("examForm").addEventListener("submit",e=>{e.preventDefault();grade();});
+document.getElementById("mathExamForm").addEventListener("submit",e=>{e.preventDefault();gradeMath();});
+// Close a result dialog.
+function closeResult(targetId="result"){
+  document.getElementById(targetId).style.display="none";
+  document.body.style.overflow="";
+}
+// Reset BSIT 2101 answers and question position.
+function resetExam(){
+  if(confirm("Reset all answers?")){
+    document.getElementById("examForm").reset();
+    clearInstantAnswerFeedback("mcqContainer");
+    questionModalState.ict.index=0;
+    closeResult();
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+}
+// Reset Mathematics answers and question position.
+function resetMathExam(){
+  if(confirm("Reset all answers?")){
+    document.getElementById("mathExamForm").reset();
+    clearInstantAnswerFeedback("mathMcqContainer");
+    questionModalState.math.index=0;
+    closeResult("mathResult");
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+}
+// Reload the page for a new examination attempt.
+function retakeExam(){
+  window.location.reload();
+}
+// Switch between subject panels.
+function switchTab(tabName){
+  const tabs=document.querySelectorAll(".tab-button");
+  const panels=document.querySelectorAll(".tab-panel");
+  tabs.forEach(button=>{
+    const isActive=button.dataset.tab===tabName;
+    button.classList.toggle("active",isActive);
+    button.setAttribute("aria-selected",String(isActive));
+  });
+  panels.forEach(panel=>{
+    const isActive=panel.id===`${tabName}-panel`;
+    panel.classList.toggle("active",isActive);
+    panel.hidden=!isActive;
+  });
+}
+document.querySelectorAll(".tab-button").forEach(button=>{
+  button.addEventListener("click",()=>switchTab(button.dataset.tab));
+});
+// Prepare question data and reveal the welcome dialog.
+function prepareExam(){
+  shuffleQuestions();
+  renderMCQ();
+  renderMathQuestions();
+  document.getElementById("date").valueAsDate=new Date();
+  document.getElementById("mathDate").valueAsDate=new Date();
+  document.getElementById("loadingMessage").textContent="Your questions are ready. Good luck!";
+  const startButton=document.getElementById("startExam");
+  startButton.disabled=false;
+  startButton.textContent="Start Examination";
+  setTimeout(()=>{
+    document.getElementById("loadingScreen").style.display="none";
+    document.getElementById("welcomeScreen").style.display="grid";
+    startButton.focus();
+  },800);
+}
+// Request fullscreen where the device supports and requires it.
+async function enterFullscreen(){
+  if(isIPhone()){
+    return;
+  }
+  if(!document.fullscreenElement){
+    await document.documentElement.requestFullscreen();
+  }
+}
+// iPhone browsers commonly do not support the required fullscreen API.
+function isIPhone(){
+  return /iPhone|iPod/i.test(navigator.userAgent);
+}
+let examStarted=false;
+let pageLeaveRefreshStarted=false;
+// Restart the page after the user leaves the examination.
+function refreshAfterPageLeave(){
+  if(examStarted&&!pageLeaveRefreshStarted){
+    pageLeaveRefreshStarted=true;
+    window.location.reload();
+  }
+}
+// Pause the interface when the examination page loses focus.
+function pauseForPageLeave(){
+  if(examStarted&&(document.hidden||!document.hasFocus())){
+    document.getElementById("pageLeaveScreen").style.display="grid";
+    document.body.style.overflow="hidden";
+  }
+}
+// Resume the interface after the user returns to the examination.
+function resumeAfterPageReturn(){
+  if(examStarted&&document.visibilityState==="visible"&&document.hasFocus()&&(isIPhone()||document.fullscreenElement)){
+    document.getElementById("pageLeaveScreen").style.display="none";
+    document.body.style.overflow="";
+  }
+}
+// Start the examination after fullscreen requirements are satisfied.
+async function startExam(){
+  try{
+    await enterFullscreen();
+  }catch(error){
+    console.error("Fullscreen is required to start the examination:",error);
+    document.getElementById("loadingMessage").textContent="Fullscreen permission is required to start the examination.";
+    return;
+  }
+  document.getElementById("welcomeScreen").style.display="none";
+  document.getElementById("fullscreenScreen").style.display="none";
+  document.body.style.overflow="";
+  examStarted=true;
+  document.getElementById("name").focus();
+}
+// Register start, fullscreen, focus, and visibility event handlers.
+document.getElementById("startExam").addEventListener("click",startExam);
+document.getElementById("returnFullscreen").addEventListener("click",startExam);
+document.getElementById("returnPage").addEventListener("click",startExam);
+document.addEventListener("contextmenu",event=>event.preventDefault());
+document.addEventListener("fullscreenchange",()=>{
+  if(examStarted&&!isIPhone()&&!document.fullscreenElement){
+    document.getElementById("fullscreenScreen").style.display="grid";
+    document.body.style.overflow="hidden";
+    document.getElementById("returnFullscreen").focus();
+  }
+  resumeAfterPageReturn();
+});
+document.addEventListener("visibilitychange",pauseForPageLeave);
+window.addEventListener("blur",pauseForPageLeave);
+window.addEventListener("focus",resumeAfterPageReturn);
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden) refreshAfterPageLeave();
+});
+window.addEventListener("blur",refreshAfterPageLeave);
+document.body.style.overflow="hidden";
+window.addEventListener("load",prepareExam,{once:true});
+</script>
+</body>
+</html>
