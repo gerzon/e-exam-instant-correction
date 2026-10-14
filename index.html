@@ -692,11 +692,11 @@ function clearInstantAnswerFeedback(containerId){
     if(question._instantFeedbackTimer){ clearTimeout(question._instantFeedbackTimer); }
   });
 }
-// Randomize the BSIT 2101 question order for each examination session.
-function shuffleQuestions(){
-  for(let i=questions.length-1;i>0;i--){
+// Randomize a question bank for the examination session.
+function shuffleQuestions(questionSet){
+  for(let i=questionSet.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
-    [questions[i],questions[j]]=[questions[j],questions[i]];
+    [questionSet[i],questionSet[j]]=[questionSet[j],questionSet[i]];
   }
 }
 // Track the active question and controls for each subject modal.
@@ -897,7 +897,8 @@ document.querySelectorAll(".tab-button").forEach(button=>{
 });
 // Prepare question data and reveal the welcome dialog.
 function prepareExam(){
-  shuffleQuestions();
+  shuffleQuestions(questions);
+  shuffleQuestions(mathQuestions);
   renderMCQ();
   renderMathQuestions();
   document.getElementById("date").valueAsDate=new Date();
