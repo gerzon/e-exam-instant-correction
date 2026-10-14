@@ -268,10 +268,10 @@ const supabaseClient = window.supabase.createClient(
   </div>
 </header>
 
-<!-- Subject tabs switch between the BSIT 2101 and Mathematics examinations. -->
+<!-- Subject tabs switch between the BSIT 2101 and ICT 1101 examinations. -->
 <div class="subject-tabs" role="tablist" aria-label="Examination subjects">
   <button class="tab-button active" type="button" data-tab="ict" role="tab" aria-selected="true" aria-controls="ict-panel" id="tab-ict">BSIT 2101</button>
-  <button class="tab-button" type="button" data-tab="math" role="tab" aria-selected="false" aria-controls="math-panel" id="tab-math">General Mathematics</button>
+  <button class="tab-button" type="button" data-tab="math" role="tab" aria-selected="false" aria-controls="math-panel" id="tab-math">ICT 1101 Compro 1</button>
 </div>
 
 <!-- Main examination content. -->
@@ -354,45 +354,45 @@ const supabaseClient = window.supabase.createClient(
 
   <div id="math-panel" class="tab-panel" role="tabpanel" aria-labelledby="tab-math" hidden>
     <form id="mathExamForm">
-      <!-- Mathematics student information fields. -->
+      <!-- ICT 1101 Compro 1 student information fields. -->
       <section class="card">
         <div class="section-title">Student Information</div>
         <div class="meta">
           <div><label for="mathName">Name</label><input id="mathName" type="text" placeholder="Enter your full name" required></div>
-          <div><label for="mathSection">Section</label><input id="mathSection" type="text" placeholder="Section" value="STEM - General Math" disabled></div>
+          <div><label for="mathSection">Section</label><input id="mathSection" type="text" placeholder="Section" value="ICT 1101 Compro 1" disabled></div>
           <div><label for="mathDate">Date</label><input id="mathDate" type="date" required></div>
         </div>
       </section>
 
-      <!-- Mathematics examination instructions and grading scale. -->
+      <!-- ICT 1101 Compro 1 examination instructions and grading scale. -->
       <section class="card">
         <div class="section-title">Instructions</div>
         <div class="instructions">
-          <strong>Multiple Choice:</strong> Choose the best answer. 10 items × 2 points = 20 points.<br>
-          <strong>Total:</strong> 20 points.
-          <table class="grading-scale" aria-label="Mathematics grading scale">
+          <strong>Multiple Choice:</strong> Choose the best answer. 50 items × 2 points = 100 points.<br>
+          <strong>Total:</strong> 100 points.
+          <table class="grading-scale" aria-label="ICT 1101 Compro 1 grading scale">
             <thead>
               <tr><th>Score</th><th>Recording</th></tr>
             </thead>
             <tbody>
-              <tr><td>18 - 20</td><td>Excellent</td></tr>
-              <tr><td>14 - 17</td><td>Proficient</td></tr>
-              <tr><td>13 &amp; below</td><td>Needs review</td></tr>
+              <tr><td>90 - 100</td><td>Will be recorded as 100 points</td></tr>
+              <tr><td>75 - 89</td><td>Actual score</td></tr>
+              <tr><td>74 &amp; below</td><td>Will be recorded as zero points</td></tr>
             </tbody>
           </table>
         </div>
       </section>
 
-      <!-- Mathematics question launcher. Individual questions render in the modal below. -->
+      <!-- ICT 1101 Compro 1 question launcher. Questions render in the modal below. -->
       <section class="card">
-        <div class="section-title">Multiple Choice <span class="points">(10 items × 2 points = 20 points)</span></div>
+        <div class="section-title">Multiple Choice <span class="points">(50 items × 2 points = 100 points)</span></div>
         <div class="question-launch">
           <p>Answer each question in the examination window.</p>
           <button id="openMathQuestions" class="open-questions" type="button">Open Questions</button>
         </div>
       </section>
 
-      <!-- Mathematics submission and reset actions. -->
+      <!-- ICT 1101 Compro 1 submission and reset actions. -->
       <section class="card">
         <div class="actions">
           <button id="mathSubmitButton" class="submit" type="submit">Submit Examination</button>
@@ -400,11 +400,11 @@ const supabaseClient = window.supabase.createClient(
         </div>
       </section>
 
-    <!-- Mathematics one-question-at-a-time modal. -->
+    <!-- ICT 1101 Compro 1 one-question-at-a-time modal. -->
     <section id="mathQuestionModal" class="question-modal" role="dialog" aria-modal="true" aria-labelledby="mathQuestionModalTitle">
       <div class="question-dialog">
         <div class="question-dialog-header">
-          <strong id="mathQuestionModalTitle">Mathematics Question</strong>
+          <strong id="mathQuestionModalTitle">ICT 1101 Compro 1 Question</strong>
           <span id="mathQuestionProgress" class="question-progress"></span>
           <button class="question-close" type="button" data-close-question-modal="mathQuestionModal">Back to Exam</button>
         </div>
@@ -417,10 +417,10 @@ const supabaseClient = window.supabase.createClient(
     </section>
     </form>
 
-    <!-- Mathematics score and answer review dialog. -->
+    <!-- ICT 1101 Compro 1 score and answer review dialog. -->
     <section id="mathResult" role="dialog" aria-modal="true" aria-labelledby="mathResultTitle" style="display:none;position:fixed;inset:0;z-index:10;overflow-y:auto;margin:0;padding:28px 15px;background:rgba(0,43,92,.55)">
       <div class="result-dialog">
-        <button class="result-close" type="button" onclick="closeResult('mathResult')" aria-label="Close mathematics result">Close</button>
+        <button class="result-close" type="button" onclick="closeResult('mathResult')" aria-label="Close ICT 1101 Compro 1 result">Close</button>
         <div id="mathResultTitle" class="section-title">Examination Result</div>
         <div id="mathResultText"></div>
         <div id="mathReview" class="review"></div>
@@ -485,18 +485,58 @@ const questions = [
 ["To achieve immutability in a class design, which methods must be removed or omitted?",["Getter methods","Setter methods","Constructors","toString methods"],"B","Setters would allow an immutable object's state to change."],
 ["In an immutable class, where are initial values assigned to fields during object instantiation?",["In setter methods","In the constructor","In static initializers","In main method"],"B","Immutable fields receive their initial values in the constructor."],
 ["Which of the following is a primary benefit of encapsulation?",["Allows code reuse and restricts direct access","Eliminates need for memory management","Speeds up compilation","Removes class dependency"],"A","Encapsulation restricts direct access and supports maintainable class design."]
-];// Mathematics question bank.
+];// BSIT 2101 question bank.
 const mathQuestions = [
-  ["What is the value of 12 + 8 × 3?",["36","60","28","24"],"B","Multiplication comes before addition, so 8 × 3 = 24 and 12 + 24 = 36."],
-  ["Find the remainder when 49 is divided by 6.",["1","3","4","5"],"C","49 ÷ 6 = 8 remainder 1."],
-  ["What is 25% of 240?",["40","50","60","80"],"C","25% of 240 is 0.25 × 240 = 60."],
-  ["Solve for x: 3x - 9 = 12.",["x = 3","x = 5","x = 7","x = 9"],"C","Add 9 to both sides: 3x = 21, then divide by 3."],
-  ["Which fraction is equivalent to 0.75?",["1/2","2/3","3/4","4/5"],"C","0.75 = 75/100 = 3/4."],
-  ["A triangle has angles 45°, 65°, and x°. What is x?",["60°","70°","80°","90°"],"B","The sum of triangle angles is 180°, so x = 180 - 45 - 65 = 70."],
-  ["What is the product of 7 and 9?",["56","63","72","81"],"B","7 × 9 = 63."],
-  ["Which number is the greatest common factor of 24 and 36?",["6","8","12","18"],"C","12 is the greatest common factor of 24 and 36."],
-  ["If a = 5 and b = 2, what is a² - b²?",["17","21","29","31"],"C","25 - 4 = 21."],
-  ["What is the perimeter of a square with side length 6 cm?",["12 cm","18 cm","24 cm","36 cm"],"C","Perimeter = 4 × 6 = 24 cm."]
+  ["Information supplied to a program while it is running is known as what?",["Data Output","Data Input","Variable","Format Specifier"],"B","Information supplied to a running program is data input."],
+  ["Which class is commonly used in Java to accept keyboard input?",["System","Output","Scanner","PrintStream"],"C","The Scanner class commonly reads keyboard input."],
+  ["Which package must be imported before using the Scanner class?",["java.io","java.lang","java.util","java.text"],"C","Scanner is part of the java.util package."],
+  ["What statement correctly imports the Scanner class?",["import Scanner;","import java.util.Scanner;","include java.util.Scanner;","import java.io.Scanner;"],"B","Use import java.util.Scanner; to import Scanner."],
+  ["In new Scanner(System.in), what does System.in represent?",["Standard output","Standard error","Standard input","File input"],"C","System.in is Java's standard input stream."],
+  ["Which standard input device is represented by System.in?",["Mouse","Keyboard","Monitor","Printer"],"B","The keyboard is the usual source for standard input."],
+  ["What keyword is used to create a new Scanner object in Java?",["create","make","new","class"],"C","The new keyword creates an object."],
+  ["Which method of Scanner reads an integer value from user input?",["nextInteger()","readInt()","getInt()","nextInt()"],"D","Scanner.nextInt() reads an integer."],
+  ["Which method of Scanner reads a decimal (double) value?",["nextFloat()","nextDouble()","readDouble()","getDouble()"],"B","Scanner.nextDouble() reads a double value."],
+  ["Which method reads single-word text up to the next whitespace?",["nextWord()","nextLine()","next()","readString()"],"C","Scanner.next() reads the next token, ending at whitespace."],
+  ["Which method reads an entire line of text including spaces?",["next()","nextLine()","readLine()","getLine()"],"B","Scanner.nextLine() reads through the end of the line."],
+  ["What action should be taken when Scanner input is no longer needed?",["Delete it","Close it","Clear it","Reset it"],"B","Close a Scanner when it is no longer needed."],
+  ["Which method is used to close a Scanner object?",["stop()","exit()","end()","close()"],"D","The close() method closes a Scanner."],
+  ["What benefit is gained by closing the Scanner object?",["Releases system resources","Erases input data","Speeds up calculations","Auto-formats code"],"A","Closing the Scanner releases its associated resources."],
+  ["What term describes information produced by a program for the user?",["Data Input","Data Output","Data Processing","Variable Storage"],"B","Information produced for the user is data output."],
+  ["Standard console output in Java is accessed through which stream?",["System.in","System.out","System.err","System.exit"],"B","System.out is Java's standard output stream."],
+  ["Which method displays output WITHOUT moving the cursor to a new line?",["println()","print()","printf()","write()"],"B","print() writes output without adding a newline."],
+  ["Which method displays output AND then moves the cursor to the next line?",["print()","printf()","println()","format()"],"C","println() writes output and then adds a line break."],
+  ["Which operator is used to concatenate text with variable values?",["*","&","+","%"],"C","The + operator concatenates strings with values."],
+  ["Which output method allows formatted output using format specifiers?",["print()","println()","printf()","append()"],"C","printf() formats output using format specifiers."],
+  ["What format specifier is used for integer values in printf()?",["%i","%d","%f","%s"],"B","%d is the format specifier for an integer."],
+  ["What format specifier is used for decimal/floating-point values?",["%d","%f","%s","%dec"],"B","%f is the format specifier for a floating-point value."],
+  ["What format specifier is used for text/string values in printf()?",["%s","%t","%str","%d"],"A","%s is the format specifier for a string."],
+  ["What format specifier moves succeeding output to a new line in printf()?",["\\n","%n","%newline","%br"],"B","%n inserts the platform-specific line separator in formatted output."],
+  ["In %.2f, what does the .2 explicitly specify?",["Two leading zeroes","Two decimal places","Two total digits","Multiplied by 2"],"B","The .2 precision displays two digits after the decimal point."],
+  ["What output is produced by System.out.print(\"A\"); System.out.print(\"B\");?",["A (new line) B","A B","AB","\"AB\""],"C","Each print() writes without a line break, so the output is AB."],
+  ["What output is produced by System.out.println(\"Java\");?",["Java (cursor stays)","Java (cursor to next line)","%s Java","Java%n"],"B","println() moves the cursor to the next line after Java."],
+  ["If price = 75.5, what does System.out.printf(\"%.2f\", price); show?",["75.5","75.50","75",".275.5"],"B","%.2f displays two digits after the decimal point: 75.50."],
+  ["If the user enters \"Java Programming Book\" into next(), what is stored?",["Java","Java Programming","Java Programming Book","Programming"],"A","next() reads only the first token before whitespace."],
+  ["If the user enters \"Java Programming Book\" into nextLine(), what is stored?",["Java","Java Programming","Java Programming Book","Book"],"C","nextLine() reads the entire line, including spaces."],
+  ["What Scanner method is used to read a byte value from input?",["nextByte()","readByte()","getByte()","next()"],"A","Scanner.nextByte() reads a byte value."],
+  ["What Scanner method is used to read a boolean value?",["nextBool()","nextBoolean()","readBoolean()","getBoolean()"],"B","Scanner.nextBoolean() reads a boolean value."],
+  ["What Scanner method is used to read a float value?",["nextFloat()","readFloat()","getFloat()","nextDouble()"],"A","Scanner.nextFloat() reads a float value."],
+  ["What Scanner method is used to read a long integer value?",["nextInt()","nextLong()","readLong()","getLong()"],"B","Scanner.nextLong() reads a long integer."],
+  ["Which class does System.out belong to?",["java.util.Scanner","java.io.PrintStream","java.lang.String","java.io.InputStream"],"B","System.out is a PrintStream."],
+  ["What happens if user enters a string when nextInt() is called?",["Auto-converts to 0","InputMismatchException","Program ignores input","Returns null"],"B","A non-integer token causes an InputMismatchException."],
+  ["In Scanner input = new Scanner(System.in);, what is input?",["Class name","Object reference variable","Keyword","Method name"],"B","input is the variable that refers to the Scanner object."],
+  ["Which delimiter stops input reading for the next() method?",["Period","Semicolon","Whitespace","Comma"],"C","next() stops its token at whitespace."],
+  ["What delimiter stops reading for the nextLine() method?",["Space character","Newline character","Tab character","Comma"],"B","nextLine() reads until the newline delimiter."],
+  ["What is the output of System.out.printf(\"Qty: %d\", 5);?",["Qty: %d","Qty: 5","Qty: 5.0","5"],"B","%d is replaced by the integer argument 5."],
+  ["How can values entered by a user be used in calculations?",["Stored in variables for calculations","Printed directly only","Converted to Scanner","Cannot be used"],"A","Input values can be stored in variables and used in expressions."],
+  ["How many format specifiers can a single printf() call contain?",["Only 1","Up to 2","Multiple","Maximum 3"],"C","A printf() call can contain multiple matching format specifiers."],
+  ["What output displays from System.out.println(\"Cost: \" + 75.5);?",["Cost: 75.5","Cost: 75.50","Cost: + 75.5","Cost:"],"A","String concatenation produces Cost: 75.5."],
+  ["Which statement is TRUE regarding program input?",["Hardcoded in source code","Supplied during execution","Cannot be stored","Only displays text"],"B","Program input can be supplied while the program is running."],
+  ["What happens if you call next() when user types \"Books Exam\"?",["Reads \"Books Exam\"","Reads \"Books\"","Reads \"Exam\"","Throws Error"],"B","next() reads the first token, Books."],
+  ["What does System.out represent in Java?",["Keyboard Input","Standard Output Stream","File Stream","Error Log"],"B","System.out is the standard output stream."],
+  ["Which statement correctly declares a Scanner object named sc?",["Scanner sc = Scanner();","Scanner sc = new Scanner(System.in);","new Scanner sc(System.in);","Scanner sc = System.in;"],"B","Create a Scanner object with new and pass System.in to its constructor."],
+  ["What is the main purpose of combining input and output operations?",["Receive, process, and display information","Compile faster","Eliminate variables","Import packages"],"A","Programs receive input, process it, and display output."],
+  ["What is the value of quantity * price if quantity=3 and price=10.5?",["31.5","30.5","33.0","31.0"],"A","3 multiplied by 10.5 equals 31.5."],
+  ["Which Oracle documentation topic provides details on printf() formatting?",["Scanning","Formatting","Parsing","Expression"],"B","The Formatting documentation explains printf() format specifiers."]
 ];
 
 // Escape question text before inserting it into the page.
@@ -560,7 +600,7 @@ function renderMCQ(){
   }).join("");
   bindInstantAnswerFeedback("mcqContainer",questions);
 }
-// Render Mathematics questions and their answer choices.
+// Render ICT 1101 Compro 1 questions and their answer choices.
 function renderMathQuestions(){
   const c=document.getElementById("mathMcqContainer");
   c.innerHTML=mathQuestions.map((q,i)=>{
@@ -762,7 +802,7 @@ if (!saveMessage) {
     : `<div class="correct">Excellent! All answered items are correct.</div>`;
   document.querySelector(".result-close").focus();
 }
-// Grade the Mathematics examination.
+// Grade the ICT 1101 Compro 1 examination.
 async function gradeMath(){
   let correct=0, answered=0, review=[];
   const form=document.getElementById("mathExamForm");
@@ -792,9 +832,9 @@ async function gradeMath(){
   const resultText=document.getElementById("mathResultText");
   const reviewBox=document.getElementById("mathReview");
   result.style.display="block";
-  resultText.innerHTML=`<div class="score">${points} / 20</div>
-    <p><strong>Multiple-choice:</strong> ${correct} correct out of 10. ${answered} item(s) answered.</p>
-    <p class="success">Your score is based on 10 multiple-choice items worth 2 points each.</p>`;
+  resultText.innerHTML=`<div class="score">${points} / 100</div>
+    <p><strong>Multiple-choice:</strong> ${correct} correct out of 50. ${answered} item(s) answered.</p>
+    <p class="success">Your score is based on 50 multiple-choice items worth 2 points each.</p>`;
   if(saveMessage){
     resultText.innerHTML+=`<p class="warning"><strong>Save status:</strong> ${escapeHTML(saveMessage)}</p>`;
   }else{
@@ -823,7 +863,7 @@ function resetExam(){
     window.scrollTo({top:0,behavior:"smooth"});
   }
 }
-// Reset Mathematics answers and question position.
+// Reset ICT 1101 Compro 1 answers and question position.
 function resetMathExam(){
   if(confirm("Reset all answers?")){
     document.getElementById("mathExamForm").reset();
